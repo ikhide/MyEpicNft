@@ -28,6 +28,15 @@ contract MyEpicNFT is ERC721URIStorage {
   event NewEpicNFTMinted(address sender, uint256 tokenId);
   event MintError(address sender, string message);
 
+  struct TokenDetail{
+    uint256 tokenId;
+    string name;
+  }
+
+  TokenDetail[] public detail;
+
+  mapping(address =>  TokenDetail[]) public userOwnedStructs;
+
   constructor() ERC721 ("SquareNFT", "SQUARE") {
     console.log("This is my NFT contract. Woah!");
   }
@@ -93,12 +102,12 @@ contract MyEpicNFT is ERC721URIStorage {
     );
 
     string memory finalTokenUri = string(
-        abi.encodePacked("data:application/json;base64,", json)
+      abi.encodePacked("data:application/json;base64,", json)
     );
 
-    console.log("\n--------------------");
-    console.log(finalTokenUri);
-    console.log("--------------------\n");
+    // console.log("\n--------------------");
+    // console.log(finalTokenUri);
+    // console.log("--------------------\n");
 
     _safeMint(msg.sender, newItemId);
   
@@ -106,10 +115,20 @@ contract MyEpicNFT is ERC721URIStorage {
   
     _tokenIds.increment();
     console.log("An NFT w/ ID %s has been minted to %s", newItemId, msg.sender);
-    emit NewEpicNFTMinted(msg.sender, newItemId);
-    }
 
-    function getTotalNFTsMintedSoFar() public view returns (uint256) {
-      return _tokenIds.current();
-    }
+    // detail.push(userOwnedStructs[msg.sender]);
+    detail = userOwnedStructs[msg.sender];
+    detail.push(TokenDetail(newItemId,combinedWord));
+    userOwnedStructs[msg.sender] = detail;
+    // console.log(detail);
+    emit NewEpicNFTMinted(msg.sender, newItemId);
   }
+
+  function getTotalNFTsMintedSoFar() public view returns (uint256) {
+    return _tokenIds.current();
+  }
+
+  function getUserTokenIds() public view returns (TokenDetail[] memory) {
+    return userOwnedStructs[msg.sender];
+  }
+}
